@@ -126,10 +126,10 @@ class Data:
                     users[line[8]]['verified'] = 'TRUE'
                     users[line[8]]['lang'] = line[20]
                     users[line[8]]['screen_name'] = line[21]
-                    users[line[8]]['description'] = line[9]
-                    users[line[8]]['created_at'] = line[10]
-                    users[line[8]]['favourites_count'] = line[11]
-                    users[line[8]]['friends_count'] = line[12]
-                    users[line[8]]['listed_count'] = line[13]
+                    users[line[8]]['description'] = line[25]
+                    users[line[8]]['created_at'] = line[2]
+                    users[line[8]]['favourites_count'] = line[22]
+                    users[line[8]]['friends_count'] = line[23]
+                    users[line[8]]['listed_count'] = line[24]
                 flag = True
         return users
