@@ -2,8 +2,6 @@ import re
 import nltk
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
-import sklearn
-import numpy as np
 
 # -*- coding: utf-8 -*-
 
@@ -15,8 +13,10 @@ class Processor:
     def __init__(self):
         pass
 
+    # This method performs standard NLP processing on text
+    # Input: dictionary of tweet data
+    # Output: dictionary of tweet data with processed text
     def processTweetText(self, tweets):
-
         for tweet in tweets:
             # Converting some values into lists
             tweets[tweet]['hashtags'] = re.findall("\".*\"", tweets[tweet]['hashtags'].lower())
@@ -40,37 +40,37 @@ class Processor:
             ps = PorterStemmer()
             tweet_text = list(map(lambda x: ps.stem(x), tweet_text))
 
-            # Testing
             tweets[tweet]['text'] = tweet_text
-            # print(tweet_text)
 
         return tweets
 
-
+    # This method processes non-text related tweet data
+    # Input: a dictionary of tweet data
+    # Output: a dictionary of processed tweet metadata
     def processTweetMeta(self, tweets):
         for tweet in tweets:
+            if not tweets[tweet]['retweeted']:
+                tweets[tweet]['retweeted'] = 'false'
 
-            try:
-                tweets[tweet]['retweet_count'] = int(tweets[tweet]['retweet_count'])
-            except:
-                tweets[tweet]['retweet_count'] = 0
+            tweets[tweet]['retweet_count'] = self.replaceNumeric(tweets[tweet]['retweet_count'])
+            tweets[tweet]['favorite_count'] = self.replaceNumeric(tweets[tweet]['favorite_count'])
 
-            try:
-                tweets[tweet]['favorite_count'] = int(tweets[tweet]['favorite_count'])
-            except:
-                tweets[tweet]['favorite_count'] = 0
+        self.applyNormalization(tweets, 'retweet_count')
+        self.applyNormalization(tweets, 'favorite_count')
 
         return tweets
 
+    # This method processes a user data
+    # Input: a dictionary of users data
+    # Output: a dictionary of processed user data
+    # TODO: Find a way to normalize location
     def processUserMeta(self, users):
-
-
         for user_id in users:
 
-            if users[user_id]['location'] is None:
+            if not users[user_id]['location']:
                 users[user_id]['location'] = 'Unknown'
 
-            if users[user_id]['time_zone'] is None:
+            if not users[user_id]['time_zone']:
                 users[user_id]['time_zone'] = 'Unknown'
 
             users[user_id]['followers_count'] = self.replaceNumeric(users[user_id]['followers_count'])
@@ -79,21 +79,22 @@ class Processor:
             users[user_id]['friends_count'] = self.replaceNumeric(users[user_id]['friends_count'])
             users[user_id]['listed_count'] = self.replaceNumeric(users[user_id]['listed_count'])
 
-
         self.applyNormalization(users, 'followers_count')
         self.applyNormalization(users, 'statuses_count')
         self.applyNormalization(users, 'favourites_count')
         self.applyNormalization(users, 'friends_count')
         self.applyNormalization(users, 'listed_count')
 
-
-
         return users
 
+    # This method applies min-max normalization on a given column of numeric data
+    # Input: a data dictionary(users or tweets) and a string representing the numeric data column
+    # Output: normalized column
     def applyNormalization(self, data, column):
         # Normalizing column
         scaled = self.minMaxNormalization(self.getColumn(data, column))
 
+        # Replacing column to normalized
         i = 0
         for key in data:
             data[key][column] = scaled[i]
@@ -102,14 +103,18 @@ class Processor:
         return data
 
 
-
-
+    # This method normalizes a given column of numeric data
+    # Input: array of numeric data
+    # Output: a scaled array of numeric data
     def minMaxNormalization(self, data):
         minimum = min(data)
         maximum = max(data)
         scaled = list(map(lambda x: (x - minimum) / (maximum-minimum), data))
         return scaled
 
+    # This method attempts to convert string value to numeric value
+    # Input: string representing a number
+    # Output: numeric value of the given string, 0 for empty strings
     def replaceNumeric(self, attrib):
         try:
             convert = int(attrib)
@@ -117,6 +122,9 @@ class Processor:
             convert = 0
         return convert
 
+    # This method pulls a column from a given dataset
+    # Input: a dictionary of data(users or tweets) and a column name
+    # Output: an array representing the column
     def getColumn(self, data, name):
         col = []
         for key in data:

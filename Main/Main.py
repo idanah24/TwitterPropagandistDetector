@@ -21,12 +21,12 @@ tweets = pr.processTweetMeta(tweets)
 print("Done!")
 
 #  Processing user meta data
-print("Processing user meta data")
+print("Processing user meta data...")
 users = pr.processUserMeta(users)
 print("Done!")
 
 # print("Printing tweet data:")
-# for tweet in tweets:
-#     print(tweets[tweet])
+for user_id in users:
+    print(users[user_id]['location'])
 # print("Done!")
 
