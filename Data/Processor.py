@@ -80,17 +80,35 @@ class Processor:
             users[user_id]['listed_count'] = self.replaceNumeric(users[user_id]['listed_count'])
 
 
+        self.applyNormalization(users, 'followers_count')
+        self.applyNormalization(users, 'statuses_count')
+        self.applyNormalization(users, 'favourites_count')
+        self.applyNormalization(users, 'friends_count')
+        self.applyNormalization(users, 'listed_count')
 
-        # statuses_count, favourites_count, friends_count, listed_count
 
-        minMax = sklearn.preprocessing.MinMaxScaler(feature_range=(0, 1))
-
-        numeric_data = [np.array(self.getColumn(users, 'favourites_count'))]
-        print(numeric_data)
-        numeric_data = minMax.fit_transform(numeric_data)
-        print(numeric_data)
 
         return users
+
+    def applyNormalization(self, data, column):
+        # Normalizing column
+        scaled = self.minMaxNormalization(self.getColumn(data, column))
+
+        i = 0
+        for key in data:
+            data[key][column] = scaled[i]
+            i += 1
+
+        return data
+
+
+
+
+    def minMaxNormalization(self, data):
+        minimum = min(data)
+        maximum = max(data)
+        scaled = list(map(lambda x: (x - minimum) / (maximum-minimum), data))
+        return scaled
 
     def replaceNumeric(self, attrib):
         try:
