@@ -71,7 +71,7 @@ class Data:
                 userTweets.append(tweets[key])
         return userTweets
 
-    # This function reads the verified tweets datasets
+    # This function reads the verified tweets dataset
     # returns a dictionary of tweets
     def readVerifiedTweets(self, path):
         tweets = dict()
