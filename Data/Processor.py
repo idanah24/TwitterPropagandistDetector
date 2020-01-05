@@ -3,6 +3,7 @@ import nltk
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
 import sklearn
+import numpy as np
 
 # -*- coding: utf-8 -*-
 
@@ -47,7 +48,6 @@ class Processor:
 
 
     def processTweetMeta(self, tweets):
-
         for tweet in tweets:
 
             try:
@@ -63,20 +63,47 @@ class Processor:
         return tweets
 
     def processUserMeta(self, users):
-        minMax = sklearn.preprocessing.MinMaxScaler(feature_range=(0, 1), copy=True)
 
-        numeric_data = getRetweetCount(users)
-        numeric_data = minMax.fit(numeric_data)
 
         for user_id in users:
 
             if users[user_id]['location'] is None:
                 users[user_id]['location'] = 'Unknown'
 
-            if users[user_id]['timezone'] is None:
-                users[user_id]['timezone'] = 'Unknown'
+            if users[user_id]['time_zone'] is None:
+                users[user_id]['time_zone'] = 'Unknown'
+
+            users[user_id]['followers_count'] = self.replaceNumeric(users[user_id]['followers_count'])
+            users[user_id]['statuses_count'] = self.replaceNumeric(users[user_id]['statuses_count'])
+            users[user_id]['favourites_count'] = self.replaceNumeric(users[user_id]['favourites_count'])
+            users[user_id]['friends_count'] = self.replaceNumeric(users[user_id]['friends_count'])
+            users[user_id]['listed_count'] = self.replaceNumeric(users[user_id]['listed_count'])
+
+
+
+        # statuses_count, favourites_count, friends_count, listed_count
+
+        minMax = sklearn.preprocessing.MinMaxScaler(feature_range=(0, 1))
+
+        numeric_data = [np.array(self.getColumn(users, 'favourites_count'))]
+        print(numeric_data)
+        numeric_data = minMax.fit_transform(numeric_data)
+        print(numeric_data)
 
         return users
+
+    def replaceNumeric(self, attrib):
+        try:
+            convert = int(attrib)
+        except:
+            convert = 0
+        return convert
+
+    def getColumn(self, data, name):
+        col = []
+        for key in data:
+            col.append(data[key][name])
+        return col
 
 
 

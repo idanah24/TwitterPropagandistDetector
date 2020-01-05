@@ -2,8 +2,6 @@ from Data.Data import Data
 from Data.Processor import Processor
 
 
-
-
 # Reading user and tweet data
 print("Reading user and tweet data...")
 dt = Data()
@@ -13,13 +11,18 @@ print("Done!")
 
 # Processing tweet textual data
 pr = Processor()
-print("Processing tweet text...")
-tweets = pr.processTweetText(tweets)
-print("Done!")
+# print("Processing tweet text...")
+# tweets = pr.processTweetText(tweets)
+# print("Done!")
 
 # Processing and normalizing the rest of the tweet data
 print("Processing tweet data...")
 tweets = pr.processTweetMeta(tweets)
+print("Done!")
+
+#  Processing user meta data
+print("Processing user meta data")
+users = pr.processUserMeta(users)
 print("Done!")
 
 # print("Printing tweet data:")
