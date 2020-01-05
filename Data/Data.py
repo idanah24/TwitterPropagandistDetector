@@ -108,3 +108,28 @@ class Data:
                 flag = True
         return tweets
 
+    # This function reads the verified user dataset
+    # returns a dictionary of users
+    def readVerifiedUsers(self, path):
+        users = dict()
+        with open(path, 'r', encoding='utf-8') as file:
+            reader = csv.reader(file)
+            flag = False
+            for line in reader:
+                if flag is not False:
+                    users[line[8]] = dict()
+                    users[line[8]]['location'] = line[17]
+                    users[line[8]]['name'] = line[1]
+                    users[line[8]]['followers_count'] = line[18]
+                    users[line[8]]['statuses_count'] = line[19]
+                    users[line[8]]['time_zone'] = ""
+                    users[line[8]]['verified'] = 'TRUE'
+                    users[line[8]]['lang'] = line[20]
+                    users[line[8]]['screen_name'] = line[21]
+                    users[line[8]]['description'] = line[9]
+                    users[line[8]]['created_at'] = line[10]
+                    users[line[8]]['favourites_count'] = line[11]
+                    users[line[8]]['friends_count'] = line[12]
+                    users[line[8]]['listed_count'] = line[13]
+                flag = True
+        return users
