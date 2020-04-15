@@ -1,32 +1,22 @@
 from Data.Data import Data
-from Data.Processor import Processor
+from ast import literal_eval
+from Models.TextModel import TextModel
+import pandas as pd
+
+pd.set_option('display.max_columns', 20)
+pd.set_option('display.width', 1000)
 
 
-# Reading user and tweet data
-print("Reading user and tweet data...")
 dt = Data()
-users = dt.readUsers('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\prop_users.csv')
-tweets = dt.readTweets('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\prop_tweets.csv')
-print("Done!")
+dt.loadData()
 
-# Processing tweet textual data
-pr = Processor()
-# print("Processing tweet text...")
-# tweets = pr.processTweetText(tweets)
-# print("Done!")
+tm = TextModel(text=dt.tweets).buildModel().saveModel()
 
-# Processing and normalizing the rest of the tweet data
-print("Processing tweet data...")
-tweets = pr.processTweetMeta(tweets)
-print("Done!")
 
-#  Processing user meta data
-print("Processing user meta data...")
-users = pr.processUserMeta(users)
-print("Done!")
 
-# print("Printing tweet data:")
-for user_id in users:
-    print(users[user_id]['location'])
-# print("Done!")
+
+
+
+
+
 
