@@ -5,11 +5,20 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from sklearn import preprocessing
 # -*- coding: utf-8 -*-
 # noinspection PyMethodMayBeStatic
+import os
+import pathlib
+
 
 class Data:
 
     def __init__(self):
         self.tweets, self.users = None, None
+        path = pathlib.Path(os.getcwd()).parent / 'Data'
+        self.RAW_VER_DATA = str(path / 'VerifiedUsers.csv')
+        self.RAW_PROP_USERS = str(path / 'prop_users.csv')
+        self.RAW_PROP_TWEETS = str(path / 'prop_tweets.csv')
+        self.READY_USERS = str(path / 'USERS.csv')
+        self.READY_TWEETS = str(path / 'TWEETS.csv')
 
     # This is the class's main method, processing all data
     def process(self):
@@ -17,7 +26,7 @@ class Data:
         prop_users = self.getPropUsers()
 
         # Reading verified data
-        ver_data = pd.read_csv('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\VerifiedUsers.csv')
+        ver_data = pd.read_csv(self.RAW_VER_DATA)
 
         # Extracting user information from verified data
         ver_users = self.getVerifiedUsers(ver_data)
@@ -36,13 +45,13 @@ class Data:
 
         self.users = users
         self.tweets = tweets
-        self.users.to_csv('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\USERS.csv')
-        self.tweets.to_csv('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\TWEETS.csv')
+        self.users.to_csv(self.READY_USERS)
+        self.tweets.to_csv(self.READY_TWEETS)
 
 
     # This method extracts propagandist information and performs some pre-filtering
     def getPropUsers(self):
-        prop_users = pd.read_csv('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\prop_users.csv')
+        prop_users = pd.read_csv(self.RAW_PROP_USERS)
         # Adding class label
         prop_users['class'] = 'Propaganda'
         # Dropping unnecessary columns
@@ -111,7 +120,7 @@ class Data:
     # if data is not given, reading and returning propaganda tweets dataframe, otherwise returns verified tweets
     def getTweets(self, data=None):
         if data is None:
-            data = pd.read_csv('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\prop_tweets.csv')
+            data = pd.read_csv(self.RAW_PROP_TWEETS)
 
         columns = ['user_id', 'user_key', 'created_at', 'retweet_count', 'retweeted', 'favorite_count',
                    'text', 'tweet_id',  'hashtags', 'mentions', 'retweeted_status_id',
@@ -155,7 +164,7 @@ class Data:
     # Output: processed corpus
     def processText(self, corpus):
         print(corpus)
-        print("Start text processing...")
+        print("[INFO] Start text processing...")
         # Low-casing and tokenizing words
         corpus = corpus.map(lambda x: x.lower())
         corpus = corpus.map(lambda x: word_tokenize(x))
@@ -171,15 +180,13 @@ class Data:
         ps = PorterStemmer()
         corpus = corpus.map(lambda val: list(map(lambda x: ps.stem(x), val)))
 
-        print("Done!")
+        print("[INFO] Done!")
         return corpus
 
     # This method loads processed and ready data
     def loadData(self):
-        self.tweets = pd.read_csv('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\TWEETS.csv',
-                                index_col=[0])
-        self.users = pd.read_csv('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\USERS.csv',
-                                 index_col=[0])
-
-
+        print("[INFO] Loading data...")
+        self.tweets = pd.read_csv(self.READY_TWEETS, index_col=[0])
+        self.users = pd.read_csv(self.READY_USERS, index_col=[0])
+        print("[INFO] Done!")
 
