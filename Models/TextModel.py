@@ -1,7 +1,8 @@
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from ast import literal_eval
-import pandas as pd
 import numpy as np
+import os
+import pathlib
 
 class TextModel:
 
@@ -10,8 +11,9 @@ class TextModel:
         self.text = text
         self.model = None
         self.vectors = None
-        self.MODEL_PATH = 'C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Models\\text_model'
-        self.VECTORS_PATH = 'C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Models\\vectors.npy'
+        path = pathlib.Path(os.getcwd()).parent / 'Models'
+        self.MODEL_PATH = str(path / 'text_model')
+        self.VECTORS_PATH = str(path / 'vectors_reduced.npy')
 
 
     def buildModel(self):
@@ -44,18 +46,21 @@ class TextModel:
 
 
     # This method returns all vectors created by the model
-    def getVectors(self, load=True):
-        if load:
-            print("Loading file...")
+    def getVectors(self, generate=True, save=False):
+        if not generate:
+            print("[INFO] Loading text vectors...")
             self.vectors = np.load(self.VECTORS_PATH)
-            print("Done!")
+            print("[INFO] Done!")
 
 
         else:
+            print("[INFO] Generating text vectors...")
             self.vectors = []
             self.text.apply(lambda row: self.vectors.append(self.model.infer_vector(literal_eval(row['text']))), axis='columns')
             self.vectors = np.array(self.vectors)
-            np.save(self.VECTORS_PATH, self.vectors)
+            if save:
+                np.save(self.VECTORS_PATH, self.vectors)
+            print("[INFO] Done!")
 
         return self.vectors
 

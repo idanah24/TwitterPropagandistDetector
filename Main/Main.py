@@ -1,9 +1,29 @@
+import sys
+import pathlib
+import os
+
+# This part sets project modules to system path
+
+def setSystemPaths():
+    main_path = str(pathlib.Path(os.getcwd()))
+    data_path = str(pathlib.Path(os.getcwd()).parent / 'Data')
+    models_path = str(pathlib.Path(os.getcwd()).parent / 'Models')
+    experiments_path = str(pathlib.Path(os.getcwd()).parent / 'Experiments')
+    # Check if necessary
+    # keras_path = str(pathlib.Path(os.getcwd()).parent / 'Experiments')
+    # sys.path.append('/home/sce-twitter/TwitterPropagandistDetector/venv/Lib/site-packages/keras')
+    paths = [main_path, data_path, models_path, experiments_path]
+    for path in paths:
+        if path not in sys.path:
+            sys.path.append(path)
+
+
+setSystemPaths()
+
 from Data.Data import Data
 from Models.NeuralNet import NeuralNet
 from Models.TextModel import TextModel
 import pandas as pd
-import numpy as np
-
 
 pd.set_option('display.max_columns', 20)
 pd.set_option('display.width', 1000)
@@ -11,8 +31,7 @@ pd.set_option('display.width', 1000)
 def prepareData(data):
 
     # Preparing text vectors
-    tm = TextModel(data.tweets).loadModel()
-    text_vectors = tm.getVectors(load=True)
+
 
     # Merging by id
     merged_by_id = pd.merge(left=dt.tweets, right=dt.users, left_on='user_id', right_on='id')
@@ -23,7 +42,18 @@ def prepareData(data):
         drop_duplicates(subset=['tweet_id'])
 
     # Merging all data
+
     merged = merged_by_id.append(merged_by_name).sort_index()
+
+    # Dropping prop data to make even number of samples
+    merged.drop(index=merged[merged['class'] == 'Propaganda'].sample(n=73125).index, inplace=True)
+
+
+    # Get text vectors
+    tm = TextModel(text=merged).loadModel()
+    text_vectors = tm.getVectors(generate=True, save=True)
+
+
 
 
     # Taking out relevant features
@@ -40,34 +70,17 @@ def prepareData(data):
     return [user_vectors, text_vectors, target_vector]
 
 
-def calcMemoryUsage(vectors):
-    sum = 0
-    for vec in vectors:
-        sum += vec.itemsize * vec.size
-
-    return sum
-
-
 dt = Data()
 dt.loadData()
 
 user_vectors, tweet_vectors, target_vector = prepareData(dt)
-
+print(len(user_vectors))
+print(len(tweet_vectors))
+print(len(target_vector))
 
 # Creating model
 network = NeuralNet(user_vectors, tweet_vectors, target_vector)
 
-network.train()
-
-
-
-
-
-
-
-
-
-
-
-
-
+history = network.train()
+# predictions = network.test()
+# network.outputResults(history, predictions)
