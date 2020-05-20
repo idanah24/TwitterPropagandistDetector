@@ -14,14 +14,17 @@ class Data:
     def __init__(self):
         self.tweets, self.users = None, None
         path = pathlib.Path(os.getcwd()).parent / 'Data'
-        self.RAW_VER_DATA = str(path / 'VerifiedUsers.csv')
+        # self.RAW_VER_DATA = str(path / 'VerifiedUsers.csv')
+        self.RAW_VER_DATA = str(path / 'VerifiedData.csv')
         self.RAW_PROP_USERS = str(path / 'prop_users.csv')
         self.RAW_PROP_TWEETS = str(path / 'prop_tweets.csv')
-        self.READY_USERS = str(path / 'USERS.csv')
-        self.READY_TWEETS = str(path / 'TWEETS.csv')
+        # self.READY_USERS = str(path / 'USERS.csv')
+        # self.READY_TWEETS = str(path / 'TWEETS.csv')
+        self.READY_USERS = str(path / 'USERS_NEW.csv')
+        self.READY_TWEETS = str(path / 'TWEETS_NEW.csv')
 
     # This is the class's main method, processing all data
-    def process(self):
+    def process(self, output_data=False):
         # Gathering propagandist info
         prop_users = self.getPropUsers()
 
@@ -45,8 +48,9 @@ class Data:
 
         self.users = users
         self.tweets = tweets
-        self.users.to_csv(self.READY_USERS)
-        self.tweets.to_csv(self.READY_TWEETS)
+        if output_data:
+            self.users.to_csv(self.READY_USERS)
+            self.tweets.to_csv(self.READY_TWEETS)
 
 
     # This method extracts propagandist information and performs some pre-filtering
@@ -163,7 +167,7 @@ class Data:
     # Input: text corpus
     # Output: processed corpus
     def processText(self, corpus):
-        print(corpus)
+
         print("[INFO] Start text processing...")
         # Low-casing and tokenizing words
         corpus = corpus.map(lambda x: x.lower())

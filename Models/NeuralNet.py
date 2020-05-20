@@ -82,6 +82,7 @@ class NeuralNet:
         self.X_tweet_test = np.reshape(self.X_tweet_test, newshape=(self.X_tweet_test.shape[0],
                                                                     self.X_tweet_test.shape[1], -1))
 
+
         # Creating optimizer
         opt = Adam(lr=1e-3, decay=1e-3 / 200)
 

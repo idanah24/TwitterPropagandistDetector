@@ -12,8 +12,10 @@ class TextModel:
         self.model = None
         self.vectors = None
         path = pathlib.Path(os.getcwd()).parent / 'Models'
-        self.MODEL_PATH = str(path / 'text_model')
-        self.VECTORS_PATH = str(path / 'vectors_reduced.npy')
+        # self.MODEL_PATH = str(path / 'text_model')
+        # self.VECTORS_PATH = str(path / 'vectors_reduced.npy')
+        self.MODEL_PATH = str(path / 'new_text_model')
+        self.VECTORS_PATH = str(path / 'new_doc_vectors.npy')
 
 
     def buildModel(self):

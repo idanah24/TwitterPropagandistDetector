@@ -9,10 +9,11 @@ def setSystemPaths():
     data_path = str(pathlib.Path(os.getcwd()).parent / 'Data')
     models_path = str(pathlib.Path(os.getcwd()).parent / 'Models')
     experiments_path = str(pathlib.Path(os.getcwd()).parent / 'Experiments')
+    engine_path = str(pathlib.Path(os.getcwd()).parent / 'Engine')
     # Check if necessary
     # keras_path = str(pathlib.Path(os.getcwd()).parent / 'Experiments')
     # sys.path.append('/home/sce-twitter/TwitterPropagandistDetector/venv/Lib/site-packages/keras')
-    paths = [main_path, data_path, models_path, experiments_path]
+    paths = [main_path, data_path, models_path, experiments_path, engine_path]
     for path in paths:
         if path not in sys.path:
             sys.path.append(path)
@@ -20,15 +21,18 @@ def setSystemPaths():
 
 setSystemPaths()
 
+from Engine.Predictor import Predictor
 from Data.Data import Data
 from Models.NeuralNet import NeuralNet
 from Models.TextModel import TextModel
+from sklearn.feature_extraction.text import TfidfVectorizer
+from ast import literal_eval
 import pandas as pd
 
 pd.set_option('display.max_columns', 20)
 pd.set_option('display.width', 1000)
 
-def prepareData(data):
+def prepareData(data, text_input='Doc2Vec'):
 
     # Preparing text vectors
 
@@ -46,15 +50,18 @@ def prepareData(data):
     merged = merged_by_id.append(merged_by_name).sort_index()
 
     # Dropping prop data to make even number of samples
-    merged.drop(index=merged[merged['class'] == 'Propaganda'].sample(n=73125).index, inplace=True)
-
+    # merged.drop(index=merged[merged['class'] == 'Propaganda'].sample(n=73125).index, inplace=True)
 
     # Get text vectors
-    tm = TextModel(text=merged).loadModel()
-    text_vectors = tm.getVectors(generate=True, save=True)
 
+    if text_input == 'Doc2Vec':
+        tm = TextModel(text=merged).buildModel().saveModel()
+        text_vectors = tm.getVectors(generate=True, save=True)
 
-
+    elif text_input == 'Tf-Idf':
+        vectorizer = TfidfVectorizer(lowercase=False, tokenizer=lambda x: x)
+        merged['text'] = merged['text'].map(lambda x: literal_eval(x))
+        text_vectors = vectorizer.fit_transform(merged['text'])
 
     # Taking out relevant features
     selected_columns = ['followers_count', 'statuses_count', 'favourites_count', 'friends_count', 'listed_count', 'class']
@@ -70,17 +77,44 @@ def prepareData(data):
     return [user_vectors, text_vectors, target_vector]
 
 
-dt = Data()
-dt.loadData()
+# dt = Data()
+# dt.loadData()
 
-user_vectors, tweet_vectors, target_vector = prepareData(dt)
-print(len(user_vectors))
-print(len(tweet_vectors))
-print(len(target_vector))
+
+
+# user_vectors, tweet_vectors, target_vector = prepareData(dt)
+
+
 
 # Creating model
-network = NeuralNet(user_vectors, tweet_vectors, target_vector)
+# network = NeuralNet(user_vectors, tweet_vectors, target_vector)
 
-history = network.train()
+# history = network.train()
 # predictions = network.test()
 # network.outputResults(history, predictions)
+
+
+
+# Creating data to test predictor
+
+data = pd.read_csv('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\verified_tweets_2.csv')
+data = data[data['user_key'] == 'Alex']
+columns = ['user_key', 'created_at', 'location', 'followers_count'
+           , 'statuses_count', 'screen_name', 'favourites_count', 'friends_count'
+           , 'listed_count', 'description']
+user_info = pd.DataFrame(data[columns]).drop_duplicates(subset=['user_key']).to_dict()
+columns = ['created_at', 'retweet_count', 'retweeted', 'favorite_count', 'text',
+           'tweet_id', 'source', 'hashtags',  'mentions',
+             'location', 'followers_count', 'statuses_count', 'lang']
+
+tweets_info = pd.DataFrame(data[columns]).to_dict()
+
+
+
+pred = Predictor()
+pred.setInput(user_info, tweets_info)
+pred.process()
+
+
+predictions, classes = pred.predict()
+
