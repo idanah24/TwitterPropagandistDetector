@@ -95,8 +95,8 @@ def prepareData(data, text_input='Doc2Vec'):
 
 
 
-# Creating data to test predictor
-
+# Creating data input to test predictor
+# Ignore this part
 data = pd.read_csv('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\verified_tweets_2.csv')
 data = data[data['user_key'] == 'Alex']
 columns = ['user_key', 'created_at', 'location', 'followers_count'
@@ -110,11 +110,21 @@ columns = ['created_at', 'retweet_count', 'retweeted', 'favorite_count', 'text',
 tweets_info = pd.DataFrame(data[columns]).to_dict()
 
 
+# Predictor class usage
 
+# Create class instance: Loads models and other information(min-max values, threshold)
 pred = Predictor()
+
+# Feed user information dict along with tweets dict to class
 pred.setInput(user_info, tweets_info)
+
+# Process data before activating model
 pred.process()
 
-
-predictions, classes = pred.predict()
+# Activating predictor on data, returns a list of:
+# 1. predictions - numpy array of rounded up actual predictions that were made
+# 2. threshold - float, the classification threshold
+# 3. classes - numpy array of 1's and 0's, where 1 is classified as propagandist and 0 is no-propagandist
+# 4. final - a string, the final prediction given by the model - deciding by the majority tweets
+predictions, threshold, classes, final = pred.predict()
 
