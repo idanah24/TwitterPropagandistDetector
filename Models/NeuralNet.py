@@ -33,7 +33,7 @@ class NeuralNet:
             None, None, None, None, None, None
 
         # Amount per batch and number of epochs for training
-        self.batch_size, self.epochs = 10000, 1
+        self.batch_size, self.epochs = 100, 8
 
         # Threshold for classifying
         self.threshold = 0.5
@@ -151,7 +151,7 @@ class NeuralNet:
             plt.tight_layout()
             plt.ylabel('Actual')
             plt.xlabel('Predicted\naccuracy={:0.4f}; misclass={:0.4f}'.format(accuracy, misclass))
-            plt.savefig(path / 'confusion_matrix.jpg')
+            plt.savefig(path / 'confusion_matrix.png')
             plt.clf()
 
         # Function that plots accuracy and loss over training epochs
@@ -165,7 +165,7 @@ class NeuralNet:
             plt.ylabel('Accuracy')
             plt.xlabel('Epoch')
             plt.legend(['Train', 'Test'], loc='upper left')
-            plt.savefig(path / 'model_accuracy.jpg')
+            plt.savefig(path / 'model_accuracy.png')
             plt.clf()
 
             # Summarize history for loss
@@ -176,7 +176,7 @@ class NeuralNet:
             plt.ylabel('Loss')
             plt.xlabel('Epoch')
             plt.legend(['Train', 'Test'], loc='upper left')
-            plt.savefig(path / 'model_loss.jpg')
+            plt.savefig(path / 'model_loss.png')
 
         # This method defines and calculates the metrics of evaluating for the test results
         def calculateMetrics(cm):
@@ -226,3 +226,4 @@ class NeuralNet:
             file.write('\n')
 
         print("[INFO] Evaluation complete!")
+        self.model.save(path / 'AC_model.h5')

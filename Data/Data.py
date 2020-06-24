@@ -21,7 +21,7 @@ class Data:
         # self.READY_USERS = str(path / 'USERS.csv')
         # self.READY_TWEETS = str(path / 'TWEETS.csv')
         self.READY_USERS = str(path / 'USERS_NEW.csv')
-        self.READY_TWEETS = str(path / 'TWEETS_NEW.csv')
+        self.READY_TWEETS = str(path / 'TWEETS_AC.csv')
 
     # This is the class's main method, processing all data
     def process(self, output_data=False):
@@ -113,10 +113,7 @@ class Data:
 
         # Mapping locations to numerical values
         # TODO: find a way to normalize this column
-        users['location'] = users['location'].astype("category").cat.codes
-
-        # TODO: normalize location
-        # users['location'] =
+        # users['location'] = users['location'].astype("category").cat.codes
 
         return users
 
@@ -157,11 +154,14 @@ class Data:
         tweets['mentions'].fillna(value='[]', inplace=True)
 
         # TODO: combine all text data before processing
-        # text_data = tweets['text'].combine(tweets['hashtags'].combine(tweets['mentions'], lambda x, y: x + y), lambda x, y: x + y)
+        # tweets['text'] = tweets['text'].combine(tweets['hashtags'].combine(tweets['mentions'], lambda x, y: x + y), lambda x, y: x + y)
 
-        tweets['text'] = self.processText(corpus=tweets['text'])
+        text = tweets.groupby('user_id')['text'].apply(lambda x: "%s" % ' '.join(x))
 
-        return tweets
+        # tweets['text'] = self.processText(corpus=tweets['text'])
+        text = self.processText(corpus=text)
+
+        return pd.DataFrame(text)
 
     # This method performs standard NLP on tweet text
     # Input: text corpus

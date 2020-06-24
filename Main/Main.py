@@ -41,22 +41,23 @@ def prepareData(data, text_input='Doc2Vec'):
     merged_by_id = pd.merge(left=dt.tweets, right=dt.users, left_on='user_id', right_on='id')
 
     # Merging missing user id's tweets by user name
-    missing_id = dt.tweets[~dt.tweets['user_id'].isin(dt.users['id'])]
-    merged_by_name = pd.merge(left=missing_id, left_on='user_key', right=dt.users, right_on='name', left_index=True). \
-        drop_duplicates(subset=['tweet_id'])
+    # missing_id = dt.tweets[~dt.tweets['user_id'].isin(dt.users['id'])]
+    # merged_by_name = pd.merge(left=missing_id, left_on='user_key', right=dt.users, right_on='name', left_index=True). \
+    #     drop_duplicates(subset=['tweet_id'])
 
     # Merging all data
 
-    merged = merged_by_id.append(merged_by_name).sort_index()
+    # merged = merged_by_id.append(merged_by_name).sort_index()
 
     # Dropping prop data to make even number of samples
     # merged.drop(index=merged[merged['class'] == 'Propaganda'].sample(n=73125).index, inplace=True)
 
     # Get text vectors
-
+    merged = merged_by_id
     if text_input == 'Doc2Vec':
-        tm = TextModel(text=merged).buildModel().saveModel()
-        text_vectors = tm.getVectors(generate=True, save=True)
+        # tm = TextModel(text=merged).buildModel().saveModel()
+        # text_vectors = tm.getVectors(generate=True, save=True)
+        text_vectors = TextModel().loadModel().getVectors(generate=False, save=False)
 
     elif text_input == 'Tf-Idf':
         vectorizer = TfidfVectorizer(lowercase=False, tokenizer=lambda x: x)
@@ -77,54 +78,54 @@ def prepareData(data, text_input='Doc2Vec'):
     return [user_vectors, text_vectors, target_vector]
 
 
-# dt = Data()
-# dt.loadData()
-
-
-
-# user_vectors, tweet_vectors, target_vector = prepareData(dt)
-
-
-
-# Creating model
-# network = NeuralNet(user_vectors, tweet_vectors, target_vector)
-
-# history = network.train()
-# predictions = network.test()
-# network.outputResults(history, predictions)
 
 
 
 # Creating data input to test predictor
 # Ignore this part
-data = pd.read_csv('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\verified_tweets_2.csv')
-data = data[data['user_key'] == 'Alex']
-columns = ['user_key', 'created_at', 'location', 'followers_count'
-           , 'statuses_count', 'screen_name', 'favourites_count', 'friends_count'
-           , 'listed_count', 'description']
-user_info = pd.DataFrame(data[columns]).drop_duplicates(subset=['user_key']).to_dict()
-columns = ['created_at', 'retweet_count', 'retweeted', 'favorite_count', 'text',
-           'tweet_id', 'source', 'hashtags',  'mentions',
-             'location', 'followers_count', 'statuses_count', 'lang']
-
-tweets_info = pd.DataFrame(data[columns]).to_dict()
+# data = pd.read_csv('C:\\Users\\Idan\\PycharmProjects\\TwitterPropagandistDetector\\Data\\verified_tweets_2.csv')
+# data = data[data['user_key'] == 'Alex']
+# columns = ['user_key', 'created_at', 'location', 'followers_count'
+#            , 'statuses_count', 'screen_name', 'favourites_count', 'friends_count'
+#            , 'listed_count', 'description']
+# user_info = pd.DataFrame(data[columns]).drop_duplicates(subset=['user_key']).to_dict()
+# columns = ['created_at', 'retweet_count', 'retweeted', 'favorite_count', 'text',
+#            'tweet_id', 'source', 'hashtags',  'mentions',
+#              'location', 'followers_count', 'statuses_count', 'lang']
+#
+# tweets_info = pd.DataFrame(data[columns]).to_dict()
 
 
 # Predictor class usage
 
 # Create class instance: Loads models and other information(min-max values, threshold)
-pred = Predictor()
+# pred = Predictor()
 
 # Feed user information dict along with tweets dict to class
-pred.setInput(user_info, tweets_info)
+# pred.setInput(user_info, tweets_info)
 
 # Process data before activating model
-pred.process()
+# pred.process()
 
 # Activating predictor on data, returns a list of:
 # 1. predictions - numpy array of rounded up actual predictions that were made
 # 2. threshold - float, the classification threshold
 # 3. classes - numpy array of 1's and 0's, where 1 is classified as propagandist and 0 is no-propagandist
 # 4. final - a string, the final prediction given by the model - deciding by the majority tweets
-predictions, threshold, classes, final = pred.predict()
+# predictions, threshold, classes, final = pred.predict()
+
+
+dt = Data()
+dt.loadData()
+
+user_vectors, tweet_vectors, target_vector = prepareData(dt)
+
+network = NeuralNet(user_vectors, tweet_vectors, target_vector)
+history = network.train()
+pred = network.test()
+network.outputResults(history, pred)
+
+
+
+
 

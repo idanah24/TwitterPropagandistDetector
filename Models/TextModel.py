@@ -14,16 +14,16 @@ class TextModel:
         path = pathlib.Path(os.getcwd()).parent / 'Models'
         # self.MODEL_PATH = str(path / 'text_model')
         # self.VECTORS_PATH = str(path / 'vectors_reduced.npy')
-        self.MODEL_PATH = str(path / 'new_text_model')
-        self.VECTORS_PATH = str(path / 'new_doc_vectors.npy')
+        self.MODEL_PATH = str(path / 'AC_text_model')
+        self.VECTORS_PATH = str(path / 'AC_doc_vectors.npy')
 
 
     def buildModel(self):
-
+        print(self.text['id'])
         print("Building model..")
         # Creating tagged document list for Doc2Vec model
         documents = []
-        self.text.apply(lambda row: documents.append(TaggedDocument(words=row['text'], tags=[row['tweet_id']])), axis='columns')
+        self.text.apply(lambda row: documents.append(TaggedDocument(words=row['text'], tags=[row['id']])), axis='columns')
 
         model = Doc2Vec(vector_size=50, min_count=2, epochs=60)
         model.build_vocab(documents)
